@@ -33,13 +33,9 @@ Thumbs.db
 # Data artifacts (ignore)
 # =========================
 # Keep templates, ignore generated data
-/data/raw/**
-/data/processed/**
 /outputs/**
 
 # Keep scaffold directories if needed
-!/data/raw/.gitkeep
-!/data/processed/.gitkeep
 !/outputs/.gitkeep
 
 # Keep template files
