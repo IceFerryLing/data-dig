@@ -15,8 +15,7 @@ from urllib.request import urlopen
 from urllib.parse import urljoin
 import xml.etree.ElementTree as ET
 
-ROOT = Path(__file__).resolve().parents[1]
-RAW_DIR = ROOT / "data" / "raw"
+RAW_DIR = Path("data") / "raw"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 
 EVENTS_PATH = RAW_DIR / "events_raw.csv"
@@ -743,7 +742,7 @@ def write_csv(path: Path, headers: List[str], rows: List[Dict[str, str]]) -> Non
 
 
 def main() -> None:
-    _load_env_file(ROOT / ".env")
+    _load_env_file(Path(".env"))
 
     print("[INFO] 开始抓取事件数据（RSS）...")
     events = fetch_events_from_rss()
