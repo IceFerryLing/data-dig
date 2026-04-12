@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from bs4 import BeautifulSoup
 import csv
 import hashlib
 import json
@@ -50,84 +50,33 @@ SEED_TS_CODES: List[str] = [
 
 
 EVENT_SOURCE_SPECS: List[Dict[str, object]] = [
-    {
-        "source": "gov_cn_yaowen",
-        "url": "https://www.gov.cn/yaowen/liebiao/",
-        "allow_domains": ["gov.cn"],
-        "allow_paths": ["/yaowen/", "/lianbo/"],
-    },
-    {
-        "source": "gov_cn_zhengce",
-        "url": "https://www.gov.cn/zhengce/zuixin/",
-        "allow_domains": ["gov.cn"],
-        "allow_paths": ["/zhengce/", "/content/"],
-    },
-    {
-        "source": "ndrc_xwfb",
-        "url": "https://www.ndrc.gov.cn/xwdt/xwfb/",
-        "allow_domains": ["ndrc.gov.cn"],
-        "allow_paths": ["/xwdt/xwfb/", "/xxgk/"],
-    },
-    {
-        "source": "csrc_news",
-        "url": "https://www.csrc.gov.cn/csrc/c100028/common_xq_list.shtml",
-        "allow_domains": ["csrc.gov.cn"],
-        "allow_paths": ["/csrc/"],
-    },
-    {
-        "source": "cninfo_notice",
-        "url": "https://www.cninfo.com.cn/new/commonUrl/pageOfSearch?url=disclosure/list/search",
-        "allow_domains": ["cninfo.com.cn"],
-        "allow_paths": ["/new/disclosure/", "disclosure/list/search"],
-    },
-    {
-        "source": "sse_announcement",
-        "url": "https://www.sse.com.cn/disclosure/listedinfo/announcement/",
-        "allow_domains": ["sse.com.cn"],
-        "allow_paths": ["/disclosure/listedinfo/", "/disclosure/announcement/"],
-    },
-    {
-        "source": "szse_disclosure",
-        "url": "https://www.szse.cn/disclosure/listed/notice/index.html",
-        "allow_domains": ["szse.cn"],
-        "allow_paths": ["/disclosure/listed/", "/disclosure/memo/"],
-    },
-    {
-        "source": "eastmoney_industry",
-        "url": "https://finance.eastmoney.com/a/cywjh.html",
-        "allow_domains": ["finance.eastmoney.com"],
-        "allow_paths": ["/a/", "/news/"],
-    },
-    {
-        "source": "yicai_news",
-        "url": "https://www.yicai.com/news/",
-        "allow_domains": ["yicai.com"],
-        "allow_paths": ["/news/", "/brief/", "/live/"],
-    },
-    {
-        "source": "yicai_brief",
-        "url": "https://www.yicai.com/brief/",
-        "allow_domains": ["yicai.com"],
-        "allow_paths": ["/brief/", "/news/"],
-    },
-    {
-        "source": "caixin_scroll",
-        "url": "https://www.caixin.com/search/newscroll",
-        "allow_domains": ["caixin.com"],
-        "allow_paths": ["/20", "/search/newscroll", "/finance/", "/china/", "/international/"],
-    },
-    {
-        "source": "kr_newsflashes",
-        "url": "https://36kr.com/newsflashes",
-        "allow_domains": ["36kr.com"],
-        "allow_paths": ["/newsflashes/", "/information/"],
-    },
-    {
-        "source": "sina_finance_roll",
-        "url": "https://finance.sina.com.cn/roll/",
-        "allow_domains": ["finance.sina.com.cn"],
-        "allow_paths": ["/stock/", "/money/", "/china/", "/roll/"],
-    },
+    # 政策类/权威新闻
+    {"source": "gov_cn_yaowen", "url": "https://www.gov.cn/yaowen/liebiao/", "allow_domains": ["gov.cn"], "allow_paths": ["/yaowen/", "/lianbo/"]},
+    {"source": "gov_cn_zhengce", "url": "https://www.gov.cn/zhengce/zuixin/", "allow_domains": ["gov.cn"], "allow_paths": ["/zhengce/", "/content/"]},
+    {"source": "ndrc_xwfb", "url": "https://www.ndrc.gov.cn/xwdt/xwfb/", "allow_domains": ["ndrc.gov.cn"], "allow_paths": ["/xwdt/xwfb/", "/xxgk/"]},
+    {"source": "csrc_news", "url": "https://www.csrc.gov.cn/csrc/c100028/common_xq_list.shtml", "allow_domains": ["csrc.gov.cn"], "allow_paths": ["/csrc/"]},
+    # 公司公告/行为
+    {"source": "cninfo_notice", "url": "https://www.cninfo.com.cn/new/commonUrl/pageOfSearch?url=disclosure/list/search", "allow_domains": ["cninfo.com.cn"], "allow_paths": ["/new/disclosure/", "disclosure/list/search"]},
+    {"source": "sse_announcement", "url": "https://www.sse.com.cn/disclosure/listedinfo/announcement/", "allow_domains": ["sse.com.cn"], "allow_paths": ["/disclosure/listedinfo/", "/disclosure/announcement/"]},
+    {"source": "szse_disclosure", "url": "https://www.szse.cn/disclosure/listed/notice/index.html", "allow_domains": ["szse.cn"], "allow_paths": ["/disclosure/listed/", "/disclosure/memo/"]},
+    # 行业/技术/财经新闻
+    {"source": "eastmoney_industry", "url": "https://finance.eastmoney.com/a/cywjh.html", "allow_domains": ["finance.eastmoney.com"], "allow_paths": ["/a/", "/news/"]},
+    {"source": "kr_newsflashes", "url": "https://36kr.com/newsflashes", "allow_domains": ["36kr.com"], "allow_paths": ["/newsflashes/", "/information/"]},
+    {"source": "sina_finance_roll", "url": "https://finance.sina.com.cn/roll/", "allow_domains": ["finance.sina.com.cn"], "allow_paths": ["/stock/", "/money/", "/china/", "/roll/"]},
+    # 新增主流新闻/财经/行业站点（参考AllNewsSpider/News-Detector）
+    {"source": "sohu_news", "url": "https://www.sohu.com/news/", "allow_domains": ["sohu.com"], "allow_paths": ["/news/", "/a/"]},
+    {"source": "ifeng_news", "url": "https://news.ifeng.com/", "allow_domains": ["ifeng.com"], "allow_paths": ["/news/", "/a/", "/c/"]},
+    {"source": "163_news", "url": "https://news.163.com/", "allow_domains": ["163.com"], "allow_paths": ["/news/", "/special/"]},
+    {"source": "thepaper_news", "url": "https://www.thepaper.cn/channel_25951", "allow_domains": ["thepaper.cn"], "allow_paths": ["/newsDetail_forward/", "/channel_25951"]},
+    {"source": "caixin_scroll", "url": "https://www.caixin.com/search/newscroll", "allow_domains": ["caixin.com"], "allow_paths": ["/20", "/search/newscroll", "/finance/", "/china/", "/international/"]},
+    {"source": "yicai_news", "url": "https://www.yicai.com/news/", "allow_domains": ["yicai.com"], "allow_paths": ["/news/", "/brief/", "/live/"]},
+    {"source": "yicai_brief", "url": "https://www.yicai.com/brief/", "allow_domains": ["yicai.com"], "allow_paths": ["/brief/", "/news/"]},
+    {"source": "jiemian_news", "url": "https://www.jiemian.com/lists/3.html", "allow_domains": ["jiemian.com"], "allow_paths": ["/article/", "/lists/"]},
+    {"source": "stcn_news", "url": "https://www.stcn.com/news/", "allow_domains": ["stcn.com"], "allow_paths": ["/news/", "/article/"]},
+    {"source": "cls_news", "url": "https://www.cls.cn/v2/roll/", "allow_domains": ["cls.cn"], "allow_paths": ["/v2/roll/", "/detail/"]},
+    {"source": "yicai_live", "url": "https://www.yicai.com/live/", "allow_domains": ["yicai.com"], "allow_paths": ["/live/"]},
+    {"source": "cctv_news", "url": "https://news.cctv.com/", "allow_domains": ["cctv.com"], "allow_paths": ["/news/", "/2024/", "/2025/", "/2026/"]},
+    {"source": "xinhuanet_news", "url": "http://www.xinhuanet.com/fortune/", "allow_domains": ["xinhuanet.com"], "allow_paths": ["/fortune/", "/politics/", "/local/"]},
 ]
 
 
@@ -208,17 +157,19 @@ def _urlopen_bytes(url: str, timeout: int = 12) -> bytes:
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
 
-    req = Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-            "Accept": "text/html,application/json,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-            "Connection": "close",
-        },
-    )
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "Accept": "text/html,application/json,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "Connection": "close",
+    }
+    # 针对 yicai 站点增加 Referer 伪装
+    if "yicai.com" in url:
+        headers["Referer"] = "https://www.yicai.com/"
 
-    retries = int(os.getenv("HTTP_RETRIES", "2"))
+    req = Request(url, headers=headers)
+
+    retries = int(os.getenv("HTTP_RETRIES", "4"))  # 默认重试次数提升
     last_err: Exception | None = None
     for _ in range(max(1, retries + 1)):
         try:
@@ -284,45 +235,49 @@ def _extract_events_from_html(
     allow_paths: List[str],
 ) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
-    anchor_pattern = re.compile(r'<a[^>]*href="([^"]+)"[^>]*>(.*?)</a>', re.I | re.S)
-
-    for href, txt in anchor_pattern.findall(html):
-        title = re.sub(r"<[^>]+>", "", txt).strip()
-        title = re.sub(r"\s+", " ", title)
+    # 优先用BeautifulSoup解析新闻链接和标题
+    soup = BeautifulSoup(html, "html.parser")
+    anchors = soup.find_all("a", href=True)
+    for a in anchors:
+        href = a.get("href", "").strip()
+        title = a.get_text(strip=True)
         if len(title) < 8:
             continue
         if any(x in title for x in ["listArrP", "'+", "+'", "${"]):
             continue
-
         if any(k in title for k in ["首页", "更多", "专题", "视频", "图片", "登录", "注册"]):
             continue
         if any(k in title for k in ["ICP备", "公网安备", "版权所有", "联系我们"]):
             continue
-
         link = _normalize_link(href, page_url)
         if not link:
             continue
         if any(x in link for x in ["listArrP", "'+", "+'", "${"]):
             continue
-
         if allow_domains and not _contains_any(link, allow_domains):
             continue
         if allow_paths and not _contains_any(link, allow_paths):
             continue
-
-        rows.append(
-            {
-                "event_id": _to_event_id(title, source_name, _infer_publish_time_from_url(link), link),
-                "title": title,
-                "content": "",
-                "source": source_name,
-                "publish_time": _infer_publish_time_from_url(link),
-                "url": link,
-                "crawl_time": crawl_time,
-                "version": "v1",
-            }
-        )
-
+        # 尝试提取正文内容（如有）
+        content = ""
+        try:
+            # 若a标签有data-content属性或父节点有摘要，优先取
+            if a.has_attr("data-content"):
+                content = a["data-content"]
+            elif a.parent and a.parent.name in ["li", "div"]:
+                content = a.parent.get_text(strip=True)
+        except Exception:
+            pass
+        rows.append({
+            "event_id": _to_event_id(title, source_name, _infer_publish_time_from_url(link), link),
+            "title": title,
+            "content": content,
+            "source": source_name,
+            "publish_time": _infer_publish_time_from_url(link),
+            "url": link,
+            "crawl_time": crawl_time,
+            "version": "v1",
+        })
     return rows
 
 
@@ -378,7 +333,7 @@ def fetch_events_from_rss() -> List[Dict[str, str]]:
                 redirect_match = re.search(r'window\.location\.href\s*=\s*"([^"]+)"', html)
                 if redirect_match:
                     target = redirect_match.group(1).strip()
-                    if target.startswith("/"):
+                    if target and not re.match(r"^https?://", target, re.I):
                         target = urljoin(page_url, target)
                     html = _urlopen_bytes(target).decode("utf-8", errors="ignore")
 
@@ -393,7 +348,7 @@ def fetch_events_from_rss() -> List[Dict[str, str]]:
                     )
                 )
 
-            except (URLError, HTTPError, TimeoutError) as e:
+            except (URLError, HTTPError, TimeoutError, ValueError) as e:
                 print(f"[WARN] 事件抓取失败: {page_url} -> {e}")
                 continue
 
@@ -446,10 +401,10 @@ def _tushare_call(token: str, api_name: str, params: Dict[str, str], fields: str
 def fetch_market_from_tushare(token: str) -> Tuple[List[Dict[str, str]], Dict[str, bool]]:
     """有token时优先使用Tushare，抓取更接近比赛需求的结构化行情。"""
     today = datetime.now().date()
-    start_days = int(os.getenv("MARKET_LOOKBACK_DAYS", "120"))
+    start_days = int(os.getenv("MARKET_LOOKBACK_DAYS", "900"))
     start_day = (today.fromordinal(today.toordinal() - start_days)).strftime("%Y%m%d")
     end_day = today.strftime("%Y%m%d")
-    max_trade_days = int(os.getenv("MARKET_MAX_TRADE_DAYS", "60"))
+    max_trade_days = int(os.getenv("MARKET_MAX_TRADE_DAYS", "500"))
 
     st_map: Dict[str, bool] = {}
     rows: List[Dict[str, str]] = []
@@ -577,7 +532,7 @@ def fetch_market_from_public(ts_codes: List[str]) -> List[Dict[str, str]]:
 
     all_rows: List[Dict[str, str]] = []
 
-    public_range = os.getenv("MARKET_PUBLIC_RANGE", "2y")
+    public_range = os.getenv("MARKET_PUBLIC_RANGE", "5y")
     for ts_code, y_symbol in symbols.items():
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{y_symbol}?range={public_range}&interval=1d"
         try:
@@ -741,11 +696,47 @@ def write_csv(path: Path, headers: List[str], rows: List[Dict[str, str]]) -> Non
             writer.writerow({k: row.get(k, "") for k in headers})
 
 
+def _read_existing_csv(path: Path) -> List[Dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open("r", newline="", encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f))
+
+
+def _merge_by_keys(
+    existing_rows: List[Dict[str, str]],
+    new_rows: List[Dict[str, str]],
+    key_fields: List[str],
+    headers: List[str],
+) -> List[Dict[str, str]]:
+    merged: Dict[tuple, Dict[str, str]] = {}
+
+    def _key_of(row: Dict[str, str]) -> tuple:
+        return tuple((row.get(k, "") or "").strip() for k in key_fields)
+
+    for r in existing_rows:
+        k = _key_of(r)
+        if any(k):
+            merged[k] = {h: r.get(h, "") for h in headers}
+
+    # 新抓取优先覆盖同键旧记录（例如字段更完整时）
+    for r in new_rows:
+        k = _key_of(r)
+        if any(k):
+            merged[k] = {h: r.get(h, "") for h in headers}
+
+    return list(merged.values())
+
+
 def main() -> None:
     _load_env_file(Path(".env"))
+    merge_with_existing = os.getenv("MERGE_WITH_EXISTING", "1").strip() == "1"
 
     print("[INFO] 开始抓取事件数据（RSS）...")
     events = fetch_events_from_rss()
+    if merge_with_existing:
+        events_old = _read_existing_csv(EVENTS_PATH)
+        events = _merge_by_keys(events_old, events, ["event_id"], EVENT_HEADERS)
     write_csv(EVENTS_PATH, EVENT_HEADERS, events)
     print(f"[INFO] events_raw 已写入: {EVENTS_PATH} | rows={len(events)}")
 
@@ -764,10 +755,16 @@ def main() -> None:
         print(f"[INFO] 未配置TUSHARE_TOKEN，使用公开源批量行情样本（symbols={len(market_universe)}）...")
         market_rows = fetch_market_from_public(market_universe)
 
+    if merge_with_existing:
+        market_old = _read_existing_csv(MARKET_PATH)
+        market_rows = _merge_by_keys(market_old, market_rows, ["ts_code", "trade_date"], MARKET_HEADERS)
     write_csv(MARKET_PATH, MARKET_HEADERS, market_rows)
     print(f"[INFO] market_daily 已写入: {MARKET_PATH} | rows={len(market_rows)}")
 
     trading_rows = build_trading_status_rows(market_rows, st_map=st_map)
+    if merge_with_existing:
+        trading_old = _read_existing_csv(TRADING_STATUS_PATH)
+        trading_rows = _merge_by_keys(trading_old, trading_rows, ["ts_code", "trade_date"], TRADING_STATUS_HEADERS)
     write_csv(TRADING_STATUS_PATH, TRADING_STATUS_HEADERS, trading_rows)
     print(f"[INFO] trading_status 已写入: {TRADING_STATUS_PATH} | rows={len(trading_rows)}")
 
