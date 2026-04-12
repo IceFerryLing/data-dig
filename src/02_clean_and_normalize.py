@@ -137,6 +137,16 @@ def _to_float_str(raw: str, decimals: int | None = 6) -> str:
     return f"{x:.{decimals}f}"
 
 
+def _to_float(raw: str) -> float | None:
+    s = _safe_strip(raw)
+    if not s:
+        return None
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
 def _to_int_like_str(raw: str) -> str:
     s = _safe_strip(raw)
     if not s:
@@ -240,6 +250,13 @@ def clean_market(rows: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]], Dict
         vol = _to_int_like_str(r.get("vol", ""))
         amount = _to_float_str(r.get("amount", ""), 2)
         pct_chg = _to_float_str(r.get("pct_chg", ""), 6)
+
+        # public 源常缺失 amount，用 vol * close 做近似回填
+        if not amount:
+            vol_f = _to_float(vol)
+            close_f = _to_float(close)
+            if vol_f is not None and close_f is not None:
+                amount = f"{(vol_f * close_f):.2f}"
 
         # high/low 缺失时做轻量补全
         nums = [x for x in [open_, close, high, low] if x]
