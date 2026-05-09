@@ -1,45 +1,14 @@
-# =========================
-# Python / Env
-# =========================
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-.python-version
 .venv/
-venv/
-
-# Environment secrets
-.env
-.env.*
-!.env.example
-
-# =========================
-# OS / Editor
-# =========================
-.DS_Store
-Thumbs.db
 .vscode/
-.idea/
+output/
 
-# =========================
-# Logs / temp
-# =========================
+*.zip
+
+debug_*.csv
+result*.xlsx
+
+*.aux
 *.log
-*.tmp
-*.temp
-
-# =========================
-# Data artifacts (ignore)
-# =========================
-# Keep templates, ignore generated data
-/outputs/**
-
-# Keep scaffold directories if needed
-!/outputs/.gitkeep
-
-# Keep template files
-!/data/templates/**
-
-# Jupyter cache
-.ipynb_checkpoints/
+*.out
+*.toc
+*.synctex.gz
